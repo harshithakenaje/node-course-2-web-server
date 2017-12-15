@@ -1,49 +1,57 @@
-var express = require('express');
-var hbs = require('hbs');
-var fs = require('fs');
+const express = require('express');
+const hbs = require('hbs');
+const fs = require('fs');
 
+const port = process.env.PORT || 3000;
 var app = express();
-hbs.registerPartials(__dirname + '/views/partials');
-app.set('viewengine','hbs');
 
+hbs.registerPartials(__dirname + '/views/partials')
+app.set('view engine', 'hbs');
 
-// app.use((req,res,next)=>{
-//     res.render('maintenance.hbs');
-// })
-app.use(express.static(__dirname + '/public')); 
-app.use((req,res,next)=>{
-    var now = new Date().toString();
-    var log = `${now}: ${req.method}  ${req.url}`
-    fs.appendFile('server.log', log +'\n');
-   next();
+app.use((req, res, next) => {
+  var now = new Date().toString();
+  var log = `${now}: ${req.method} ${req.url}`;
+
+  console.log(log);
+  fs.appendFile('server.log', log + '\n');
+  next();
 });
 
-hbs.registerHelper('getCurrentYear', ()=>{
-    return new Date().getFullYear();
-});
-hbs.registerHelper('screamIt',(text)=>{
-    return text.toUpperCase();
-})
-app.get('/',(req,res)=>{
-//   res.send('<h1>Hello express</h1>');
-res.render('home.hbs',{
-    pageTitle: 'Home page',
-    welcomeMessage: 'Welcome Andrew'
-    });
-});
-app.get('/about', (req,res)=>{
-    res.render('about.hbs',{
-        pageTitle: 'About page',
-        welcomeMessage: 'Welcome to website'
-    });
+// app.use((req, res, next) => {
+//   res.render('maintenance.hbs');
+// });
+
+app.use(express.static(__dirname + '/public'));
+
+hbs.registerHelper('getCurrentYear', () => {
+  return new Date().getFullYear();
 });
 
-app.get('/bad',(req,res)=>{
-    res.send({
-        errorMessage: 'Unable to connect'
-    });
+hbs.registerHelper('screamIt', (text) => {
+  return text.toUpperCase();
 });
 
-app.listen(3000,()=>{
-    console.log('Server is up now')
+app.get('/', (req, res) => {
+  res.render('home.hbs', {
+    pageTitle: 'Home Page',
+    welcomeMessage: 'Welcome to my website'
+  });
+});
+
+app.get('/about', (req, res) => {
+  res.render('about.hbs', {
+    pageTitle: 'About Page',
+    welcomeMessage: 'Welcome to my website'
+  });
+});
+
+// /bad - send back json with errorMessage
+app.get('/bad', (req, res) => {
+  res.send({
+    errorMessage: 'Unable to handle request'
+  });
+});
+
+app.listen(port, () => {
+  console.log(`Server is up on port ${port}`);
 });
